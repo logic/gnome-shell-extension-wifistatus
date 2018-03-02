@@ -23,14 +23,13 @@ const Spawn = Me.imports.spawn;
 function Schedulable(signalCallBack, essidCallBack) {
     return () => {
         new Spawn.SpawnReader().spawn('./', ['iwconfig'], (line) => {
-            let res;
-            res = String(line).match(/ESSID:"([^"]*)"$/);
-            if (res) {
-                essidCallBack(res[1])
+            let essid = String(line).match(/ESSID:"([^"]*)"\s*$/);
+            if (essid) {
+                essidCallBack(essid[1])
             }
-            res = String(line).match(/Link Quality=([0-9]*)\/([0-9]*)/);
-            if (res) {
-                signalCallBack(Number(res[1]), Number(res[2]))
+            let qual = String(line).match(/Link Quality=([0-9]*)\/([0-9]*)/);
+            if (qual) {
+                signalCallBack(Number(qual[1]), Number(qual[2]))
             }
         });
         return true;

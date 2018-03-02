@@ -14,48 +14,66 @@
 // You should have received a copy of the GNU General Public License along with
 // this program. If not, see <https://www.gnu.org/licenses/>.
 
-const St = imports.gi.St;
 const Gio = imports.gi.Gio;
+const Lang = imports.lang;
 const Main = imports.ui.main;
 const MainLoop = imports.mainloop;
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
+const St = imports.gi.St;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Icon = Me.imports.icon;
 const Wireless = Me.imports.wireless;
 
-let button, icon;
+const WifiStatus = new Lang.Class({
+    Name: 'WifiStatus',
+    Extends: PanelMenu.SystemIndicator,
 
-function _updateESSID(essid) {
-    // Nothing to do yet
-}
+    _init() {
+        this.parent();
 
-function _updateIcon(value, max) {
-    icon.icon_name = Icon.Pick(value, max)
-}
+        // Wifi status icon
+        this._indicator = this._addIndicator();
+        this._indicator.icon_name = Icon.Unknown;
+        Main.panel.statusArea.aggregateMenu._indicators.insert_child_at_index(this.indicators, 0);
+
+        // Wifi status text in menu
+        this._item = new PopupMenu.PopupSubMenuMenuItem('Disconnected', true);
+        this._item.icon.icon_name = Icon.Unknown;
+        this.menu.addMenuItem(this._item, 0);
+        Main.panel.statusArea.aggregateMenu.menu.addMenuItem(this.menu, 4);
+
+        MainLoop.timeout_add_seconds(5, Wireless.Schedulable(
+            this._updateIcon.bind(this),
+            this._updateESSID.bind(this)
+        ));
+    },
+
+    _updateIcon(value, max) {
+        this._indicator.icon_name = Icon.Pick(value, max);
+        this._item.icon.icon_name = this._indicator.icon_name;
+    },
+
+    _updateESSID(essid) {
+        if (!essid) {
+            this._item.label.text = '-';
+        } else {
+            this._item.label.text = essid;
+        }
+    },
+});
+
+let wifi;
 
 function init() {
-    button = new St.Bin({
-        style_class: 'panel-button',
-        reactive: true,
-        can_focus: true,
-        x_fill: true,
-        y_fill: false,
-        track_hover: true
-    });
-
-    icon = new St.Icon({
-        icon_name: Icon.Unknown,
-        style_class: 'system-status-icon'
-    });
-
-    button.set_child(icon);
-    MainLoop.timeout_add_seconds(5, Wireless.Schedulable(_updateIcon, _updateESSID));
+    if (!wifi) {
+        wifi = new WifiStatus();
+    }
 }
 
 function enable() {
-    Main.panel._rightBox.insert_child_at_index(button, 0);
 }
 
 function disable() {
-    Main.panel._rightBox.remove_child(button);
 }

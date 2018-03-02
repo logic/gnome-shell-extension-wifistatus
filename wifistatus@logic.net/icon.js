@@ -25,6 +25,6 @@ const icon_names = [
 var Unknown = 'network-wireless-no-route-symbolic';
 
 function Pick(current, range) {
-    let choice = Math.round((current / range) * icon_names.length);
+    let choice = Math.round((current / range) * (icon_names.length - 1));
     return 'network-wireless-signal-' + icon_names[choice] + '-symbolic';
 }
