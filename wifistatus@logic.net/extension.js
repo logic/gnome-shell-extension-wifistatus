@@ -26,12 +26,9 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Icon = Me.imports.icon;
 const Wireless = Me.imports.wireless;
 
-const WifiStatus = new Lang.Class({
-    Name: 'WifiStatus',
-    Extends: PanelMenu.SystemIndicator,
-
-    _init() {
-        this.parent();
+class WifiStatus extends PanelMenu.SystemIndicator {
+    constructor() {
+        super();
 
         // Wifi status icon
         this._indicator = this._addIndicator();
@@ -44,31 +41,33 @@ const WifiStatus = new Lang.Class({
         this.menu.addMenuItem(this._item, 0);
         Main.panel.statusArea.aggregateMenu.menu.addMenuItem(this.menu, 4);
 
-        MainLoop.timeout_add_seconds(5, Wireless.Schedulable(
-            this._updateIcon.bind(this),
-            this._updateESSID.bind(this)
-        ));
-    },
-
-    _updateIcon(value, max) {
-        this._indicator.icon_name = Icon.Pick(value, max);
-        this._item.icon.icon_name = this._indicator.icon_name;
-    },
-
-    _updateESSID(essid) {
-        if (!essid) {
-            this._item.label.text = '-';
-        } else {
-            this._item.label.text = essid;
-        }
-    },
-});
+        MainLoop.timeout_add_seconds(5, () => {
+            try {
+                Wireless.Schedulable(
+                    (value, max) => {
+                        this._indicator.icon_name = Icon.Pick(value, max);
+                        this._item.icon.icon_name = this._indicator.icon_name;
+                    },
+                    (essid) => {
+                        if (!essid) {
+                            this._item.label.text = '-';
+                        } else {
+                            this._item.label.text = essid;
+                        }
+                    }
+                );
+            } catch (e) {
+            }
+            return true;
+        });
+    }
+};
 
 let wifi;
 
 function init() {
     if (!wifi) {
-        wifi = new WifiStatus();
+        wifi = new WifiStatus;
     }
 }
 
