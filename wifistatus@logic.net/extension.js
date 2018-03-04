@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU General Public License along with
 // this program. If not, see <https://www.gnu.org/licenses/>.
 
-const Gio = imports.gi.Gio;
-const Lang = imports.lang;
 const Main = imports.ui.main;
 const MainLoop = imports.mainloop;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const St = imports.gi.St;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Icon = Me.imports.icon;
