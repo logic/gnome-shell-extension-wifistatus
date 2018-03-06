@@ -21,8 +21,14 @@ function Spawn(path, command, func) {
     let [res, pid, stdin, stdout, stderr] = GLib.spawn_async_with_pipes(
         path, command, null, GLib.SpawnFlags.SEARCH_PATH, null);
 
+    GLib.close(stderr);
+    GLib.close(stdin);
+
     let stream = new Gio.DataInputStream({
-        base_stream: new Gio.UnixInputStream({ fd: stdout })
+        base_stream: new Gio.UnixInputStream({
+            fd: stdout,
+            close_fd: true
+        }),
     });
 
     _read(stream, func);
