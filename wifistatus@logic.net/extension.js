@@ -54,6 +54,7 @@ class WifiStatus extends PanelMenu.SystemIndicator {
                     }
                 );
             } catch (e) {
+                print(e);
             }
             return true;
         });

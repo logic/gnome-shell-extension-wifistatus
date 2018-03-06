@@ -42,6 +42,8 @@ function _read(stream, func) {
         if (out !== null) {
             func(out);
             _read(source, func);
+        } else {
+            source.close(null);
         }
     });
 }
